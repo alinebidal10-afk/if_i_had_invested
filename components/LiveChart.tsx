@@ -92,5 +92,108 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
 
     const narrow = size.w < 520;
     const pad: Pad = narrow ? { top: 10, right: 78, bottom: 30, left: 46 } : { top: 12, right: 96, bottom: 44, left: 64 };
-    const t0 = 
+    const t0 = lines.length ? Math.min(...lines.map((l) => l.buyT)) : 0;
+
+    // Every line in the units being shown, with a running min and max so "the highest value so far" is one lookup.
+    const series = useMemo<Series[]>(
+        () =>
+            lines.map((l) => {
+                const conv = (p: number) => (unit === 'value' ? valueNow(amount, l.buy, p) : pctChange(l.buy, p));
+                const pts = thin([...l.points.filter((p) => p.t >= l.buyT), { t: tEnd, p: l.now }]).map((p) => ({ t: p.t, v: conv(p.p) }));
+                let lo = Infinity;
+                let hi = -Infinity;
+                const cmin: number[] = [];
+                const cmax: number[] = [];
+                for(const p of pts) {
+                    lo = Math.min(lo, p.v);
+                    hi = Math.max(hi, p.v);
+                    cmin.push(lo);
+                    cmax.push(hi);
+                }
+                return { symbol: l.symbol, color: l.color, buyT: l.buyT, pts, cmin, cmax };
+            })
+        [lines, amount, unit, tEnd],
+    );
+
+    // ── the frame loop: everything that moves is written straight to the DOM, never through React state ──
+    const els = useRef({
+        paths: new Map<string, SVGPathElement>(),
+        tips: new Map<string, SVGGElement>(),
+        tags: new Map<string, HTMLDivElement>(),
+        xt: new Map<number, SVGGElement>(),
+        yt: new Map<number, SVGGElement>(),
+        hair: null as SVGLineElement | null,
+        base: null as SVGGElement | null,
+        dateTag: null as HTMLDivElement | null,
+        mo: null as HTMLSpanElement | null,
+        yr: null as HTMLSpanElement | null,
+    });
+    const st _ useRef({
+        lo: 0
+        hi: 1,
+        init: false,
+        unit,
+        lastP: 0,
+        sig: '',
+        tick: { at: 0, xEnd: 0, lo: 0, hi: 1, forced: true },
+        year: '',
+        cost: 0,
+        frames: 0,
+        logged: false,
+        X: (t: number) => t,
+        Y: (v: number) => v,
+    });
+    const live = useRef({ series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, ver: 0 });
+    live.current = { series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, ver: live.current.ver + 1 };
+    const frameRef = useRef(() => {});
+
+    function place(g: SVGGElement, axis: 'x' | 'y', v: number) {
+        const L = live.current;
+        const S = st.current;
+        if (axis === 'x') {
+            const x = S.X(v);
+            g.style.visibility = x < L.pad.left - 1 || x > L.w - L.pad.right + 1 ? 'hidden': 'visible';
+            g.setAttribute('transform', `translate(0 ${y.toFixed(1)})`);
+        } else {
+            const y = S.Y(v);
+            g.style.visibility = y < L.pad.top - 1 || y > L.h - L.pad.bottom + 1 ? 'hidden' : 'visible';
+            g.setAttribute('transform', `translate(0 ${y.toFixed(1)})`);     
+        }
+    }
+
+    frameRef.current = () => {
+        const L = live.current;
+        const E = els.current;
+        const S = st.current;
+        if (!L.series.length || L.w <= 0 || L.h <= 0) return;
+        const began = performance.now();
+
+        const span = Math.max(1, L.tEnd - L.t0);
+        const p = progress.current ?? 0;
+        const tPlay = L.t0 + p * span;
+        const tc = L.hoverT !== null ? Math.min(L.hoverT, tPlay) : tPlay; // where the crosshair is
+        const ended = p >= 1;
+        const xEnd = L.t0 + Math.max(tPlay - L.t0, minWindow(span));
+
+        //Y: fit the highest and lowest values readched so far, 12% of air, and never tighter than 20% of the midpoint.
+        let lo = Infinity
+        let hi = -Infinity;
+        const idx = L.series.map((s) => lastAt(S.pts, tPlay));
+        L.series.forEach((s, k) => {
+            const i = idx[k];
+            if (i < 0) return;
+            const head = valueAt(S.pts, i, tPlay);
+            lo = Math.min(lo, s.cmin[i], head);
+            hi = Math.max(hi, s.cmax[i], head);
+        });
+        if (!Number.isFinite(lo)) {
+            lo = L.unit === 'value' ? L.amount * 0.9 : -10;
+            hi = L.unit === 'value' ? L.amount * 1.1 : 10;
+        }
+        const air = (hi - lo) * 0.12;
+        lo -= air;
+        hi += air; 
+        const minRange = L.unit === 'value' ? Math.abs((lo + hi) / 2) * 0.2 : 20;
+        
+    }
 }
