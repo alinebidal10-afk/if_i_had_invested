@@ -1,0 +1,1033 @@
+{
+ "url": "http://localhost:3011/?assets=AAPL,BTC-USD&date=2015-06-01&amount=2500",
+ "at": "2026-10-20T13:41:35.310Z",
+ "allow": [
+  "headline-lines",
+  "hero-words",
+  "measure",
+  "few-pictures",
+  "no-footage",
+  "first-action"
+ ],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.64
+   ],
+   "motion": {
+    "elements": 14,
+    "css": 9,
+    "transitions": 2,
+    "scripted": 3,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 900,
+     "screens": 1,
+     "words": 46,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 1,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "$916,133.63",
+     "words": 1,
+     "chars": 11,
+     "lines": 1,
+     "size": 56,
+     "vw": 3.9,
+     "font": "Geist",
+     "weight": 400,
+     "tracking": -0.03,
+     "leading": 1.05,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "left",
+     "widthRatio": 0.21,
+     "top": 101,
+     "tag": "p",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "If I had invested on in Apple and Bitcoin .",
+     "words": 10,
+     "lines": 2,
+     "size": 31.3,
+     "font": "Geist"
+    },
+    "headings": [
+     {
+      "text": "If I had invested on in Apple and Bitcoin .",
+      "words": 10,
+      "chars": 43,
+      "lines": 2,
+      "size": 31.3,
+      "vw": 2.2,
+      "font": "Geist",
+      "weight": 400,
+      "tracking": -0.01,
+      "leading": 1.6,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "center",
+      "position": "center",
+      "widthRatio": 0.26,
+      "top": 20,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "$916,133.63",
+      "words": 1,
+      "chars": 11,
+      "lines": 1,
+      "size": 56,
+      "vw": 3.9,
+      "font": "Geist",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.21,
+      "top": 101,
+      "tag": "p",
+      "kind": "heading"
+     },
+     {
+      "text": "$29,327.91",
+      "words": 1,
+      "chars": 10,
+      "lines": 1,
+      "size": 56,
+      "vw": 3.9,
+      "font": "Geist",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.19,
+      "top": 101,
+      "tag": "p",
+      "kind": "statement"
+     }
+    ],
+    "headingSummary": {
+     "count": 3,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 1,
+     "centered": 1,
+     "medianWords": 10,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Geist",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      14,
+      15,
+      16,
+      31,
+      56
+     ],
+     "sizeCount": 5,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 56,
+      "vw": 3.9,
+      "font": "Geist",
+      "text": "$916,133.63"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.46,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#000000",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#f4f4f2",
+       "share": 0.37
+      },
+      {
+       "color": "#f3f3f2",
+       "share": 0.37
+      },
+      {
+       "color": "#f4f4f3",
+       "share": 0.17
+      },
+      {
+       "color": "#7ee0a8",
+       "share": 0.09
+      }
+     ],
+     "button": null,
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 1,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "canvas",
+      "ratio": 1
+     },
+     {
+      "type": "svg",
+      "ratio": 0.61
+     }
+    ],
+    "nav": null,
+    "fontsLoaded": [
+     "geist"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 900,
+    "margins": {
+     "left": 32,
+     "right": 32
+    },
+    "sections": [
+     {
+      "sel": "div.entry",
+      "tag": "div",
+      "top": 0,
+      "height": 810,
+      "words": 9,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "If I had invested",
+       "size": 31,
+       "tag": "h1"
+      },
+      "left": 536,
+      "right": 536,
+      "textLeft": 570,
+      "textRight": 574,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section.play",
+      "tag": "section",
+      "top": 99,
+      "height": 689,
+      "words": 8,
+      "media": 1,
+      "middle": 0,
+      "heading": null,
+      "left": 32,
+      "right": 32,
+      "textLeft": 49,
+      "textRight": 779,
+      "fullBleed": false,
+      "footer": true,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "If I had invested on in Apple and Bitcoin .",
+      "size": 31,
+      "top": 20,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 14,
+    "stage": true,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.77
+   ],
+   "motion": {
+    "elements": 14,
+    "css": 9,
+    "transitions": 2,
+    "scripted": 3,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1024,
+     "screens": 1,
+     "words": 46,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 1,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "$916,111.31",
+     "words": 1,
+     "chars": 11,
+     "lines": 1,
+     "size": 32.3,
+     "vw": 4.2,
+     "font": "Geist",
+     "weight": 400,
+     "tracking": -0.03,
+     "leading": 1.05,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "left",
+     "widthRatio": 0.27,
+     "top": 75,
+     "tag": "p",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "If I had invested on in Apple and Bitcoin .",
+     "words": 10,
+     "lines": 1,
+     "size": 23.2,
+     "font": "Geist"
+    },
+    "headings": [
+     {
+      "text": "$916,111.31",
+      "words": 1,
+      "chars": 11,
+      "lines": 1,
+      "size": 32.3,
+      "vw": 4.2,
+      "font": "Geist",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.27,
+      "top": 75,
+      "tag": "p",
+      "kind": "heading"
+     },
+     {
+      "text": "$29,327.48",
+      "words": 1,
+      "chars": 10,
+      "lines": 1,
+      "size": 32.3,
+      "vw": 4.2,
+      "font": "Geist",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.32,
+      "top": 75,
+      "tag": "p",
+      "kind": "statement"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 1,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Geist",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      14,
+      15,
+      16,
+      23,
+      32
+     ],
+     "sizeCount": 5,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 32.3,
+      "vw": 4.2,
+      "font": "Geist",
+      "text": "$916,111.31"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.46,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#000000",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#f4f4f2",
+       "share": 0.37
+      },
+      {
+       "color": "#f3f3f2",
+       "share": 0.37
+      },
+      {
+       "color": "#f4f4f3",
+       "share": 0.17
+      },
+      {
+       "color": "#7ee0a8",
+       "share": 0.09
+      }
+     ],
+     "button": null,
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 1,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "canvas",
+      "ratio": 1
+     },
+     {
+      "type": "svg",
+      "ratio": 0.67
+     }
+    ],
+    "nav": null,
+    "fontsLoaded": [
+     "geist"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1024,
+    "margins": {
+     "left": 32,
+     "right": 32
+    },
+    "sections": [
+     {
+      "sel": "div.entry",
+      "tag": "div",
+      "top": 0,
+      "height": 922,
+      "words": 9,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "If I had invested",
+       "size": 23,
+       "tag": "h1"
+      },
+      "left": 141,
+      "right": 141,
+      "textLeft": 169,
+      "textRight": 173,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section.play",
+      "tag": "section",
+      "top": 73,
+      "height": 839,
+      "words": 8,
+      "media": 1,
+      "middle": 0,
+      "heading": null,
+      "left": 32,
+      "right": 32,
+      "textLeft": 49,
+      "textRight": 204,
+      "fullBleed": false,
+      "footer": true,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "If I had invested on in Apple and Bitcoin .",
+      "size": 23,
+      "top": 20,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 14,
+    "stage": true,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.63
+   ],
+   "motion": {
+    "elements": 14,
+    "css": 9,
+    "transitions": 2,
+    "scripted": 3,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 844,
+     "screens": 1,
+     "words": 49,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 1,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "$914,739.22",
+     "words": 1,
+     "chars": 11,
+     "lines": 1,
+     "size": 28,
+     "vw": 7.2,
+     "font": "Geist",
+     "weight": 400,
+     "tracking": -0.03,
+     "leading": 1.05,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.75,
+     "top": 101,
+     "tag": "p",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "If I had invested on in Apple and Bitcoin .",
+     "words": 10,
+     "lines": 2,
+     "size": 20,
+     "font": "Geist"
+    },
+    "headings": [
+     {
+      "text": "$914,739.22",
+      "words": 1,
+      "chars": 11,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Geist",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.75,
+      "top": 101,
+      "tag": "p",
+      "kind": "heading"
+     },
+     {
+      "text": "$29,326.20",
+      "words": 1,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Geist",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.65,
+      "top": 180,
+      "tag": "p",
+      "kind": "statement"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 1,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Geist",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      14,
+      15,
+      16,
+      20,
+      28
+     ],
+     "sizeCount": 5,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 28,
+      "vw": 7.2,
+      "font": "Geist",
+      "text": "$914,739.22"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.44,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#000000",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 0
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#f3f3f2",
+       "share": 0.42
+      },
+      {
+       "color": "#f4f4f2",
+       "share": 0.35
+      },
+      {
+       "color": "#f4f4f3",
+       "share": 0.17
+      },
+      {
+       "color": "#7ee0a8",
+       "share": 0.07
+      }
+     ],
+     "button": null,
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 1,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "canvas",
+      "ratio": 1
+     },
+     {
+      "type": "svg",
+      "ratio": 0.43
+     }
+    ],
+    "nav": null,
+    "fontsLoaded": [
+     "geist"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 844,
+    "margins": {
+     "left": 20,
+     "right": 20
+    },
+    "sections": [
+     {
+      "sel": "div.entry",
+      "tag": "div",
+      "top": 0,
+      "height": 760,
+      "words": 9,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "If I had invested",
+       "size": 20,
+       "tag": "h1"
+      },
+      "left": 55,
+      "right": 55,
+      "textLeft": 96,
+      "textRight": 82,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section.play",
+      "tag": "section",
+      "top": 99,
+      "height": 573,
+      "words": 10,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "$916,111.20",
+       "size": 28,
+       "tag": "p"
+      },
+      "left": 20,
+      "right": 20,
+      "textLeft": 20,
+      "textRight": 116,
+      "fullBleed": false,
+      "footer": true,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "If I had invested on in Apple and Bitcoin .",
+      "size": 20,
+      "top": 20,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 14,
+    "stage": true,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "small-title",
+   "width": 1440,
+   "message": "The h1 is 31px (\"If I had invested on in Apple and Bitcoin .\").",
+   "fix": "Set the title at display size, or make the large text of the first screen the h1.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "still-page",
+   "width": 1440,
+   "message": "Little motion: 14 element(s) moved while the page loaded and scrolled.",
+   "fix": "Give every section an entrance for its parts (not one fade of the whole block) and add one moving picture: a looping clip or a slow move on a photograph."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "/Users/alinebidal/Projects/terra-week1/.taste-skill/inspect-done/desktop-fold.jpg",
+   "pages": [
+    "/Users/alinebidal/Projects/terra-week1/.taste-skill/inspect-done/desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "/Users/alinebidal/Projects/terra-week1/.taste-skill/inspect-done/tablet-fold.jpg",
+   "pages": [
+    "/Users/alinebidal/Projects/terra-week1/.taste-skill/inspect-done/tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "/Users/alinebidal/Projects/terra-week1/.taste-skill/inspect-done/mobile-fold.jpg",
+   "pages": [
+    "/Users/alinebidal/Projects/terra-week1/.taste-skill/inspect-done/mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}
