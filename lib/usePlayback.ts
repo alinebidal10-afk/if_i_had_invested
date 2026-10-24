@@ -17,7 +17,8 @@ const readSpeed = () => {
 // The replay clock. `progress` (0..1 of the span) is integrated from frame times, so a speed change
 // only changes the rate: the playhead date never jumps. React sees `playT` about 30 times a second;
 // the chart reads `progress` directly every frame.
-export function usePlayback({ on, t0, tEnd, instant }: { on: boolean; t0: number; tEnd: number; instant: boolean }) {
+// `fixedMs` pins the whole run to that length and ignores the speed control (story mode, recorded videos).
+export function usePlayback({ on, t0, tEnd, instant, fixedMs }: { on: boolean; t0: number; tEnd: number; instant: boolean; fixedMs?: number }) {
   const progress = useRef(0);
   const speedRef = useRef(1);
   const [speed, setSpeedState] = useState(1);
@@ -26,14 +27,15 @@ export function usePlayback({ on, t0, tEnd, instant }: { on: boolean; t0: number
   const [playT, setPlayT] = useState(t0);
 
   const years = spanYears(t0, tEnd);
-  const baseMs = durationMs(years, 1);
+  const baseMs = fixedMs ?? durationMs(years, 1);
 
   // The saved speed, read after mount so the server and first client render agree.
   useEffect(() => {
+    if (fixedMs) return; // a fixed-length run plays at 1x whatever was saved
     const s = readSpeed();
     speedRef.current = s;
     setSpeedState(s);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setSpeed = useCallback((s: number) => {
     speedRef.current = s; // takes effect on the next frame, from the current playhead

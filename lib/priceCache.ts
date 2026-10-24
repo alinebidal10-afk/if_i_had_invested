@@ -13,6 +13,9 @@ async function fetchPrices(symbols: string[], date: string): Promise<Prices> {
   if (!qr.ok || !hr.ok) throw new Error('Prices are unavailable right now. Try again in a moment.');
   const quotes: Quote[] = await qr.json();
   if (!quotes.length) throw new Error('Nothing found for that asset.');
+  // In the order asked for, whatever order Yahoo answers in: colours follow the position in the URL.
+  const at = (s: string) => (symbols.indexOf(s) + 1 || 99);
+  quotes.sort((a, b) => at(a.symbol) - at(b.symbol));
   return { quotes, history: await hr.json() };
 }
 

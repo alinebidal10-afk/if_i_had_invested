@@ -238,3 +238,35 @@ button { font: inherit; color: inherit; cursor: pointer; border-radius: var(--ra
   .controls button { padding: 4px 10px; }
   .controls .note { font-size: 12px; }
 }
+
+/* ── story mode (?mode=story): a 9:16 frame for recording. Sizes follow the frame width (cqw), so the same layout
+   holds at 390×844 and in the 1080×1920 render. The right 15% and the bottom 20% stay free: TikTok's buttons and
+   caption sit there. ── */
+.story { position: relative; height: 100svh; overflow: hidden; }
+.story-frame {
+  position: relative; z-index: 2; height: 100%; margin: 0 auto;
+  width: min(100vw, calc(100svh * 9 / 16)); container-type: size;
+}
+.story-safe { position: absolute; inset: 0; padding: 10cqh 15cqw 20cqh 6cqw; display: flex; flex-direction: column; }
+.wm { position: absolute; left: 6cqw; top: 5cqh; margin: 0; font-size: 3.6cqw; letter-spacing: 0.01em; color: rgba(244, 244, 242, 0.62); }
+.st-title { margin: 0 0 1.4cqh; font-size: 6.4cqw; line-height: 1.2; font-weight: 600; letter-spacing: -0.015em; color: var(--ink); overflow-wrap: anywhere; }
+.st-sentence { margin: 0; font-size: 4.8cqw; line-height: 1.4; color: var(--mid); }
+.st-big { margin-top: 1.6cqh; }
+.st-value { margin: 0; line-height: 1; letter-spacing: -0.04em; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; transition: filter 0.5s var(--ease); }
+.st-who { margin: 1cqh 0 0; display: flex; align-items: center; gap: 2cqw; font-size: 4.2cqw; color: var(--ink); }
+.st-sub { margin: 1cqh 0 0; font-size: 4.2cqw; color: var(--dim); font-variant-numeric: tabular-nums; }
+.st-race { list-style: none; margin: 1.2cqh 0 0; padding: 0; display: grid; gap: 0.2cqh; font-size: 3.8cqw; }
+.st-race li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2.4cqw; color: var(--dim); font-variant-numeric: tabular-nums; }
+.st-race li .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st-race li .v { color: var(--ink); transition: filter 0.5s var(--ease); }
+.st-chart { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 2cqh; }
+.story .datebig { font-size: 6cqw; margin-bottom: 0.4cqh; }
+.story .plot { min-height: 80px; }
+.st-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 12px 28px; border: 0; background: #fff; color: #000; font-size: 18px; font-weight: 600; }
+.st-error { margin: 4cqh 0 0; font-size: 4.4cqw; color: var(--down); }
+.st-note { margin: 1.4cqh 0 0; font-size: 3.2cqw; color: rgba(244, 244, 242, 0.55); }
+.story .dot { width: 2.4cqw; height: 2.4cqw; }
+/* ?hide=1: the number, the race values, the price tags and the value axis stay blurred until the last second */
+.story[data-hide='true'] .st-value, .story[data-hide='true'] .st-race .v, .story[data-hide='true'] .tag.price,
+.story[data-hide='true'] text.tl[text-anchor='end'] { filter: blur(14px); }
+.story[data-hide='true'] .tag.price, .story[data-hide='true'] text.tl[text-anchor='end'] { filter: blur(6px); }

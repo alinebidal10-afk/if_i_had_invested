@@ -18,6 +18,7 @@ type Props = {
   loading: boolean;
   progress: RefObject<number>; // the playhead, 0..1 of the span; read every frame, never through React state
   tEnd: number; // the end of the span: "today"
+  endLabel?: string; // what the big date says at the end, when "today" is a fixed date
 };
 
 type Series = { symbol: string; color: string; buyT: number; pts: { t: number; v: number }[]; cmin: number[]; cmax: number[] };
@@ -77,7 +78,7 @@ const minWindow = (span: number) => Math.min(span, Math.max(span * 0.03, 30 * DA
 
 type Pad = { top: number; right: number; bottom: number; left: number };
 
-export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase, startLabel, loading, progress, tEnd }: Props) {
+export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase, startLabel, loading, progress, tEnd, endLabel = 'Today' }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [ticks, setTicks] = useState<{ x: XTick[]; y: YTick[] }>({ x: [], y: [] });
@@ -144,8 +145,8 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
     X: (t: number) => t,
     Y: (v: number) => v,
   });
-  const live = useRef({ series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, ver: 0 });
-  live.current = { series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, ver: live.current.ver + 1 };
+  const live = useRef({ series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, ver: 0 });
+  live.current = { series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, ver: live.current.ver + 1 };
   const frameRef = useRef(() => {});
 
   function place(g: SVGGElement, axis: 'x' | 'y', v: number) {
@@ -289,9 +290,9 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
       E.dateTag.style.transform = `translate(${left.toFixed(1)}px, ${L.pad.top + ih + 8}px)`;
     }
 
-    // The big date above the plot: the playhead, the hovered day, or "Today".
+    // The big date above the plot: the playhead, the hovered day, or "Today" (or the frozen end date).
     const showToday = ended && L.hoverT === null;
-    const moTxt = showToday ? 'Today' : mo;
+    const moTxt = showToday ? L.endLabel : mo;
     const yrTxt = showToday ? '' : yr;
     if (E.mo && E.mo.textContent !== moTxt) E.mo.textContent = moTxt;
     if (E.yr && E.yr.textContent !== yrTxt) {
