@@ -291,3 +291,4 @@ button { font: inherit; color: inherit; cursor: pointer; border-radius: var(--ra
 .st-rank .pos { color: var(--dim); font-weight: 500; }
 .st-rank .v { color: var(--ink); }
 .leadtag { color: var(--ink); font-weight: 600; }
+.st-chart[data-ranked='true'] .tags, .st-chart[data-ranked='true'] .datebig { opacity: 0; } /* the ranking card is the last word */

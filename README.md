@@ -26,11 +26,26 @@ Fill in one sentence: "If I had invested $___ on ___ in ___". You can pick up to
   - Share (S key) opens the phone's share sheet, or copies the link.
   - Links show a preview image made by `/api/og`.
 
+## Story mode and videos
+
+`?mode=story` turns any link into a 9:16 recording view: no inputs or buttons, a domain watermark, and the right 15% and bottom 20% left clear for TikTok's overlays. Extra options:
+
+- `autoplay=1`: plays on load.
+- `duration=25`: the whole run in seconds, including a 2 s hold on the final frame.
+- `asOf=2026-09-30`: freezes "today" at that date and turns off live prices, so a video can be made again with the same numbers.
+- `hide=1`: blurs the final value until the last second.
+- `title=...`: adds a headline above the sentence (plain text, 90 characters at most).
+- `units=10000` and `paid=41`: shows a quantity held instead of dollars invested. `paid` is the starting value only when there is no market price on that date.
+- `preset=iphone-2007`: uses a product from `data/presets/products.json` ("Instead of buying…").
+
+`npm run render` reads `scenarios/*.json` and writes `out/<id>.mp4` (1080×1920) and `out/<id>.png` (the link's preview image). Set `RENDER_BASE` to the address of a running copy of the site (default `http://localhost:3000`). It needs `ffmpeg` on the PATH for mp4 output.
+
 ## Deploy
 
 The app is hosted on Vercel. Set `NEXT_PUBLIC_SITE_URL` to the public address (for example `https://ifihadinvested1.com`) so link previews use the right domain. Then run `vercel deploy --prod`.
 
 ## Notes
 
-- Yahoo has no Bitcoin prices before 2014 and no gold futures (GC=F) before August 2000.
+- Yahoo has no Bitcoin prices before Sep 17, 2014. Earlier daily prices (from Jul 18, 2010) come from Coin Metrics community data, under the CC BY-NC 4.0 license (attribution required, non-commercial use only), in `data/btc-early.json`.
+- Yahoo has no gold futures (GC=F) before August 2000.
 - Binance is blocked in some regions. There, crypto falls back to the 5 s check.

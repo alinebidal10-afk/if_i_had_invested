@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { pctChange, priceAt } from '../lib/calc';
 import { assetLabel } from '../lib/assets';
 import { NOT_ADVICE, sourceNote } from '../lib/disclaimer';
@@ -17,6 +17,7 @@ import { usePlayback } from '../lib/usePlayback';
 import LiveChart, { type Line } from './LiveChart';
 import Sky from './Sky';
 
+const LAYOUT_W = 390; // the frame is laid out at phone width, then zoomed to fill a bigger one (1080×1920)
 const INTRO_MS = 700; // the sentence and the starting value, still, before the line starts
 const dayMs = (iso: string) => Date.parse(iso + 'T00:00:00Z');
 
@@ -24,6 +25,7 @@ declare global {
   interface Window {
     __storyReady?: number; // Date.now() when the first frame is final (the render script trims the video here)
     __playbackDone?: boolean;
+    __playbackDoneAt?: number; // Date.now() when the hold ended (where the render script cuts the video)
     __storyError?: string;
   }
 }
@@ -41,6 +43,20 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
   const [fonts, setFonts] = useState(false);
   const [go, setGo] = useState(false);
   const [done, setDone] = useState(false);
+  const [box, setBox] = useState<{ w: number; h: number; z: number } | null>(null);
+
+  // A 9:16 frame as big as the window allows. Above phone width it is laid out at LAYOUT_W and zoomed, so a
+  // 1080×1920 recording looks exactly like the phone, only sharper (the chart measures in unzoomed pixels).
+  useLayoutEffect(() => {
+    const fit = () => {
+      const w = Math.min(window.innerWidth, (window.innerHeight * 9) / 16);
+      const z = Math.max(1, w / LAYOUT_W);
+      setBox({ w: w / z, h: window.innerHeight / z, z });
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, []);
 
   useEffect(() => {
     document.fonts.ready.then(() => setFonts(true));
@@ -110,6 +126,7 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
   useEffect(() => {
     if (!pb.ended) return;
     const id = setTimeout(() => {
+      window.__playbackDoneAt = Date.now();
       window.__playbackDone = true;
       setDone(true);
     }, HOLD_MS);
@@ -156,7 +173,7 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
   return (
     <main className="story" data-hide={hidden} data-done={done}>
       <Sky dim />
-      <div className="story-frame">
+      <div className="story-frame" style={box ? { width: box.w, height: box.h, zoom: box.z } : undefined}>
         <p className="wm">{domain}</p>
         <div className="story-safe">
           {opts.title && <h1 className="st-title">{opts.title}</h1>}
@@ -178,7 +195,7 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
                   </p>
                 )}
               </div>
-              <div className="st-chart">
+              <div className="st-chart" data-ranked={pb.ended && values.length > 1 && !hidden}>
                 <LiveChart
                   lines={lines}
                   amount={amount}

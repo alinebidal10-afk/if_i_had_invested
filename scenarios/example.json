@@ -1,0 +1,20 @@
+[
+  {
+    "id": "iphone-2007",
+    "url": "/?preset=iphone-2007&duration=20&asOf=2026-09-30&title=Skip%20the%20first%20iPhone%3F",
+    "account": "tiktok",
+    "notes": "F1 Instead of buying. Preset price and date still TODO-verify in data/presets/products.json."
+  },
+  {
+    "id": "pizza-2010",
+    "url": "/?assets=BTC-USD&date=2010-05-22&units=10000&paid=41&duration=22&hide=1&asOf=2026-09-30&title=10%2C000%20BTC%20for%20two%20pizzas%2C%20May%202010",
+    "account": "tiktok",
+    "notes": "F3 Famous regrets. No market price on May 22, 2010: starts from the $41 paid (price implied by the trade); Coin Metrics prices from Jul 18, 2010."
+  },
+  {
+    "id": "race-2019",
+    "url": "/?assets=NVDA,TSLA,BTC-USD,SPY&date=2019-01-02&amount=1000&duration=25&asOf=2026-09-30&title=%241%2C000%20in%202019%3A%20which%20one%20wins%3F",
+    "account": "x",
+    "notes": "F4 Race: same amount and date, four assets."
+  }
+]
