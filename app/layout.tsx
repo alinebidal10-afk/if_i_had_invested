@@ -9,6 +9,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3011'),
   title: 'If I had invested',
   description: 'Pick an amount, a date and an asset. Watch what it would be worth now, live.',
+  // The homepage preview: the blank sentence. A comparison link replaces all of this with its own.
+  openGraph: {
+    type: 'website',
+    siteName: 'If I had invested',
+    title: 'If I had invested',
+    description: 'Pick an amount, a date and an asset. Watch what it would be worth now, live.',
+    images: [{ url: '/api/og', width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image', title: 'If I had invested', description: 'Pick an amount, a date and an asset. Watch what it would be worth now, live.', images: ['/api/og'] },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -19,6 +19,8 @@ type Props = {
   progress: RefObject<number>; // the playhead, 0..1 of the span; read every frame, never through React state
   tEnd: number; // the end of the span: "today"
   endLabel?: string; // what the big date says at the end, when "today" is a fixed date
+  leader?: string | null; // in a race, the line that is ahead is drawn a little stronger
+  marks?: { t: number; symbol: string }[]; // where the lead changed hands: a ring on the new leader's line
 };
 
 type Series = { symbol: string; color: string; buyT: number; pts: { t: number; v: number }[]; cmin: number[]; cmax: number[] };
@@ -26,6 +28,7 @@ type XTick = Entry<{ key: number; label: string }>; // key is the time
 type YTick = Entry<{ key: number; label: string }>; // key is the value
 
 const DAY = 864e5;
+const NO_MARKS: { t: number; symbol: string }[] = [];
 const MAX_POINTS = 500;
 const TAG_H = 22; // price tags never sit closer than this
 const FADE_MS = 150;
@@ -78,7 +81,7 @@ const minWindow = (span: number) => Math.min(span, Math.max(span * 0.03, 30 * DA
 
 type Pad = { top: number; right: number; bottom: number; left: number };
 
-export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase, startLabel, loading, progress, tEnd, endLabel = 'Today' }: Props) {
+export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase, startLabel, loading, progress, tEnd, endLabel = 'Today', leader = null, marks = NO_MARKS }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [ticks, setTicks] = useState<{ x: XTick[]; y: YTick[] }>({ x: [], y: [] });
@@ -122,6 +125,7 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
     paths: new Map<string, SVGPathElement>(),
     tips: new Map<string, SVGGElement>(),
     tags: new Map<string, HTMLDivElement>(),
+    marks: new Map<number, SVGGElement>(),
     xt: new Map<number, SVGGElement>(),
     yt: new Map<number, SVGGElement>(),
     hair: null as SVGLineElement | null,
@@ -145,8 +149,8 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
     X: (t: number) => t,
     Y: (v: number) => v,
   });
-  const live = useRef({ series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, ver: 0 });
-  live.current = { series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, ver: live.current.ver + 1 };
+  const live = useRef({ series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, marks, ver: 0 });
+  live.current = { series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, marks, ver: live.current.ver + 1 };
   const frameRef = useRef(() => {});
 
   function place(g: SVGGElement, axis: 'x' | 'y', v: number) {
@@ -274,6 +278,20 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
       const el = E.tags.get(t.sym);
       if (el) el.style.transform = `translate(${L.w - L.pad.right + 8}px, ${(t.y - TAG_H / 2).toFixed(1)}px)`;
     }
+
+    // Lead changes: a ring where the new leader's line was at that moment, once the playhead has passed it.
+    L.marks.forEach((m, k) => {
+      const g = E.marks.get(k);
+      const s = L.series.find((x) => x.symbol === m.symbol);
+      const i = s ? lastAt(s.pts, m.t) : -1;
+      if (!g) return;
+      if (!s || i < 0 || m.t > tPlay) {
+        g.style.visibility = 'hidden';
+        return;
+      }
+      g.style.visibility = 'visible';
+      g.setAttribute('transform', `translate(${X(m.t).toFixed(1)} ${Y(valueAt(s.pts, i, m.t)).toFixed(1)})`);
+    });
 
     // Crosshair: the hairline, and the date tag directly under it.
     const cx = X(tc);
@@ -451,7 +469,17 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
 
                 <g clipPath="url(#plotclip)">
                   {series.map((s) => (
-                    <path key={s.symbol} ref={(el) => void (el ? els.current.paths.set(s.symbol, el) : els.current.paths.delete(s.symbol))} className="draw" stroke={s.color} />
+                    <path
+                      key={s.symbol}
+                      ref={(el) => void (el ? els.current.paths.set(s.symbol, el) : els.current.paths.delete(s.symbol))}
+                      className={leader ? (s.symbol === leader ? 'draw lead' : 'draw behind') : 'draw'}
+                      stroke={s.color}
+                    />
+                  ))}
+                  {marks.map((m, k) => (
+                    <g key={k} className="mark" ref={(el) => void (el ? els.current.marks.set(k, el) : els.current.marks.delete(k))} style={{ visibility: 'hidden' }}>
+                      <circle r="8" stroke={series.find((x) => x.symbol === m.symbol)?.color ?? '#fff'} />
+                    </g>
                   ))}
                 </g>
                 {series.map((s) => (

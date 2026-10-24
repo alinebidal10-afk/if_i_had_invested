@@ -13,7 +13,8 @@ export type Readout = {
 };
 
 // `held`: an invisible stand-in with the same rows, so the chart below never moves when the numbers arrive.
-export default function Readouts({ items, held = false }: { items: Readout[]; held?: boolean }) {
+// `lead`: in a race, the asset that is ahead at the playhead.
+export default function Readouts({ items, held = false, lead = null }: { items: Readout[]; held?: boolean; lead?: string | null }) {
   const sorted = [...items].sort((a, b) => (b.value ?? -Infinity) - (a.value ?? -Infinity));
   return (
     <div className={held ? 'readouts held' : 'readouts'} aria-hidden={held || undefined}>
@@ -30,6 +31,7 @@ export default function Readouts({ items, held = false }: { items: Readout[]; he
                     <span title={it.quote.name}>{assetLabel(it.quote.symbol)}</span>
                   </span>
                   {it.pct !== null && <span className={it.pct >= 0 ? 'up' : 'down'}>{percent(it.pct)}</span>}
+                  {lead === it.quote.symbol && <span className="leadtag">Leading</span>}
                   <span className={f.live ? 'live' : ''}>{f.label}</span>
                 </p>
               </>

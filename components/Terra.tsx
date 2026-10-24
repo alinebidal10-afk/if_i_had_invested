@@ -8,7 +8,9 @@ import { shareText, shareUrl, type ShareRow } from '../lib/share';
 import { SPEEDS, usePlayback } from '../lib/usePlayback';
 import { formatAmount, formatAmountPlain, formatDate, parseAmount, parseDate, type Precision } from '../lib/parse';
 import { MAX_ASSETS } from '../lib/assets';
-import { EARLY_BTC_ATTRIBUTION, usesEarlyBtc } from '../lib/btcEarly';
+import { NOT_ADVICE, sourceNote } from '../lib/disclaimer';
+import { COLORS } from '../lib/colors';
+import { useLead } from '../lib/useLead';
 import { loadPrices, type Prices } from '../lib/priceCache';
 import type { AssetInfo, Kind } from '../lib/types';
 import { useLivePrices } from '../lib/useLivePrices';
@@ -20,7 +22,6 @@ import Sentence, { type EditRequest, type SlotName } from './Sentence';
 import SharePop from './SharePop';
 import Sky from './Sky';
 
-const COLORS = ['#f4f4f2', '#7ee0a8', '#f5c26b', '#8ab4ff', '#f28fad'];
 const EASE = [0.22, 1, 0.36, 1] as const;
 const HEADER_TOP = 20;
 const HEADER_PX = 16;
@@ -449,6 +450,17 @@ export default function Terra() {
     };
   });
 
+  // The race is called at the playhead, not under the pointer: hovering the past does not change who leads.
+  const tLead = runOn ? (pb.ended ? tEnd : pb.playT) : 0;
+  const race = useLead(
+    rows.map((r) => {
+      const p = pb.ended ? r.now : priceAt(r.points, tLead);
+      return { symbol: r.quote.symbol, value: r.buyPt && p !== null && tLead >= r.buyPt.t ? valueNow(data!.amount, r.buyPt.p, p) : null };
+    }),
+    tLead,
+    pb.playing,
+  );
+
   // Memoised: Terra re-renders every frame during playback, and LiveChart keys its work on this array.
   const lines: Line[] = useMemo(
     () => rows.flatMap((r) => (r.buyPt ? [{ symbol: r.quote.symbol, color: r.color, buy: r.buyPt.p, buyT: r.buyPt.t, now: r.now, points: r.points }] : [])),
@@ -476,7 +488,7 @@ export default function Terra() {
   const sUrl = submitted && typeof window !== 'undefined' ? shareUrl(submitted.symbols.split(','), submitted.iso, submitted.amount, window.location.origin) : '';
 
   // Sources under the chart; the early Bitcoin prices carry their own licence line.
-  const note = `Returns include dividends. Prices: Yahoo Finance, Binance.${submitted && usesEarlyBtc(submitted.symbols.split(','), submitted.iso) ? ` ${EARLY_BTC_ATTRIBUTION}.` : ''}`;
+  const note = data ? `${sourceNote({ symbols: data.prices.quotes.map((q) => q.symbol), iso: data.iso, kinds: data.prices.quotes.map((q) => q.kind), live: true })} ${NOT_ADVICE}` : NOT_ADVICE;
 
   const flash = (msg: string) => {
     setToast(msg);
@@ -641,7 +653,7 @@ export default function Terra() {
           sliding under the buttons. The rows below are always laid out (only faded), so the chart never jumps. */}
       <div className="result" style={{ top: headerBottom + 28 }}>
         <section className="play" data-on={chartOn} aria-hidden={!chartOn}>
-          {data && phase === 'play' ? <Readouts key="on" items={readouts} /> : submitted && <Readouts key="held" held items={heldReadouts} />}
+          {data && phase === 'play' ? <Readouts key="on" items={readouts} lead={race.lead} /> : submitted && <Readouts key="held" held items={heldReadouts} />}
           <LiveChart
             key={runKey}
             lines={lines}
@@ -654,6 +666,8 @@ export default function Terra() {
             loading={loading}
             progress={pb.progress}
             tEnd={tEnd}
+            leader={race.lead}
+            marks={race.marks}
           />
         </section>
         <div className="speedrow" data-on={controls} aria-hidden={!controls}>

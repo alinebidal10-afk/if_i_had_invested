@@ -3,12 +3,11 @@ import { Suspense } from 'react';
 import Story from '../components/Story';
 import Terra from '../components/Terra';
 import { listNames } from '../lib/assets';
-import { formatAmount, formatDate, parseDate } from '../lib/parse';
+import { formatAmount, formatDate } from '../lib/parse';
 import { redirect } from 'next/navigation';
-import { resolveScenario, scenarioQuery } from '../lib/scenario';
+import { resolveScenario, scenarioQuery, sentenceOf } from '../lib/scenario';
 import { SITE_DOMAIN } from '../lib/site';
 import { parseStoryOpts, STORY_MAX_ASSETS } from '../lib/story';
-import { parseSymbols } from '../lib/yahoo';
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -17,14 +16,15 @@ const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v
 // A shared link carries the whole comparison, so its preview can too. The image route reads the same params.
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const sp = await searchParams;
-  const symbols = parseSymbols(first(sp.assets));
-  const iso = first(sp.date);
-  const amount = Number(first(sp.amount));
-  if (!symbols.length || !/^\d{4}-\d{2}-\d{2}$/.test(iso) || !parseDate(iso).ok || !(amount > 0 && amount <= 1e12)) return {};
+  const get = (k: string) => first(sp[k]) || null;
+  const s = resolveScenario(get);
+  if (!s) return {};
+  const opts = parseStoryOpts(get);
 
-  const title = `${formatAmount(amount)} in ${listNames(symbols)} since ${formatDate(iso, 'day')}`;
-  const description = `If I had invested ${formatAmount(amount)} on ${formatDate(iso, 'day')} in ${listNames(symbols)}, what would it be worth today?`;
-  const image = `/api/og?${new URLSearchParams({ assets: symbols.join(','), date: iso, amount: String(amount) })}`;
+  const plain = !s.units && !s.preset;
+  const title = opts.title || (plain ? `${formatAmount(s.amount ?? 0)} in ${listNames(s.symbols)} since ${formatDate(s.iso, 'day')}` : sentenceOf(s).replace(/\.$/, ''));
+  const description = plain ? `If I had invested ${formatAmount(s.amount ?? 0)} on ${formatDate(s.iso, 'day')} in ${listNames(s.symbols)}, what would it be worth today?` : `${sentenceOf(s)} What would it be worth today?`;
+  const image = `/api/og?${scenarioQuery(s, { title: opts.title, asOf: opts.asOf })}`;
   return {
     title,
     description,

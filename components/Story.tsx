@@ -2,7 +2,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { pctChange, priceAt } from '../lib/calc';
 import { assetLabel } from '../lib/assets';
-import { EARLY_BTC_ATTRIBUTION, usesEarlyBtc } from '../lib/btcEarly';
+import { NOT_ADVICE, sourceNote } from '../lib/disclaimer';
+import { COLORS } from '../lib/colors';
+import { useLead } from '../lib/useLead';
 import { money } from '../lib/format';
 import { tagPct } from '../lib/ticks';
 import { durationMs, spanYears } from '../lib/pace';
@@ -15,7 +17,6 @@ import { usePlayback } from '../lib/usePlayback';
 import LiveChart, { type Line } from './LiveChart';
 import Sky from './Sky';
 
-const COLORS = ['#f4f4f2', '#7ee0a8', '#f5c26b', '#8ab4ff'];
 const INTRO_MS = 700; // the sentence and the starting value, still, before the line starts
 const dayMs = (iso: string) => Date.parse(iso + 'T00:00:00Z');
 
@@ -123,6 +124,13 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
     })
     .sort((a, b) => (b.value ?? -Infinity) - (a.value ?? -Infinity));
   const top = values[0];
+  const race = useLead(
+    values.map((v) => ({ symbol: v.r.quote.symbol, value: v.value })),
+    t,
+    pb.playing && (pb.progress.current ?? 0) > 0.04, // the first few frames are noise, not a race
+  );
+  const leading = values.find((v) => v.r.quote.symbol === race.lead) ?? top;
+  const colorOf = (sym: string) => usable.find((r) => r.quote.symbol === sym)?.color ?? '#fff';
 
   // ?hide=1: the number stays blurred until the last second of the run.
   const leftMs = (1 - (pb.progress.current ?? 0)) * playMs;
@@ -135,14 +143,14 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
 
   // Every line starts from the same dollar value (the amount, or the units at their first price).
   const amount = usable[0] ? usable[0].start.qty * usable[0].start.buy.p : (scenario.amount ?? 0);
-  const label = big(top?.value ?? amount);
+  const label = big(leading?.value ?? amount);
   const one = values.length === 1 ? values[0] : null;
   const startSub = !one
     ? ''
     : scenario.units
       ? `Worth ${formatAmount(Math.round(amount * 100) / 100)} in ${formatDate(iso, 'month')}${one.r.start.implied ? ' (price implied by the trade)' : ''}`
       : `From ${formatAmount(Math.round(amount * 100) / 100)}${one.value !== null && go ? ` · ${tagPct(pctChange(amount, one.value))}` : ''}`;
-  // As big as the frame allows: smaller in a race, where the list below needs the room.
+  // As big as the frame allows: a little smaller in a race, where the chart carries four price tags.
   const fit = { fontSize: `min(${values.length > 1 ? 13 : 17}cqw, ${(118 / Math.max(6, label.length)).toFixed(2)}cqw)` };
 
   return (
@@ -164,23 +172,12 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
                   {label}
                 </p>
                 {startSub && <p className="st-sub">{startSub}</p>}
-                {values.length > 1 && top && (
+                {values.length > 1 && leading && (
                   <p className="st-who">
-                    <span className="dot" style={{ background: top.r.color }} /> {assetLabel(top.r.quote.symbol)} leads
+                    <span className="dot" style={{ background: leading.r.color }} /> {assetLabel(leading.r.quote.symbol)} {pb.ended ? 'wins' : 'leads'}
                   </p>
                 )}
               </div>
-              {values.length > 1 && (
-                <ol className="st-race">
-                  {values.map(({ r, value }) => (
-                    <li key={r.quote.symbol}>
-                      <span className="dot" style={{ background: r.color }} />
-                      <span className="nm">{assetLabel(r.quote.symbol)}</span>
-                      <span className="v">{value === null ? '—' : big(value)}</span>
-                    </li>
-                  ))}
-                </ol>
-              )}
               <div className="st-chart">
                 <LiveChart
                   lines={lines}
@@ -194,7 +191,26 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
                   progress={pb.progress}
                   tEnd={tEnd}
                   endLabel={opts.asOf ? formatDate(opts.asOf) : undefined}
+                  leader={race.lead}
+                  marks={race.marks}
                 />
+                {race.flash && !pb.ended && (
+                  <p key={race.flash.n} className="st-flash">
+                    <span className="dot" style={{ background: colorOf(race.flash.symbol) }} /> {assetLabel(race.flash.symbol)} takes the lead
+                  </p>
+                )}
+                {pb.ended && values.length > 1 && !hidden && (
+                  <ol className="st-rank" aria-label="Final ranking">
+                    {values.map(({ r, value }, i) => (
+                      <li key={r.quote.symbol}>
+                        <span className="pos">{ORDINAL[i]}</span>
+                        <span className="dot" style={{ background: r.color }} />
+                        <span className="nm">{assetLabel(r.quote.symbol)}</span>
+                        <span className="v">{value === null ? '—' : big(value)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
                 {ready && !opts.autoplay && !go && (
                   <button type="button" className="st-play" onClick={() => setGo(true)}>
                     Play
@@ -204,8 +220,8 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
             </>
           )}
           <p className="st-note">
-            For fun. Not financial advice.
-            {usesEarlyBtc(symbols, iso) && <span className="src">{EARLY_BTC_ATTRIBUTION}.</span>}
+            {NOT_ADVICE}
+            {prices && <span className="src">{sourceNote({ symbols, iso, kinds: prices.quotes.map((q) => q.kind), live: asOfMs === null })}</span>}
           </p>
         </div>
       </div>
@@ -214,4 +230,5 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
 }
 
 const NONE: never[] = [];
+const ORDINAL = ['1st', '2nd', '3rd', '4th'];
 const noop = () => {};

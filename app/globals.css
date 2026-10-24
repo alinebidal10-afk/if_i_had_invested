@@ -255,11 +255,7 @@ button { font: inherit; color: inherit; cursor: pointer; border-radius: var(--ra
 .st-value { margin: 0; line-height: 1; letter-spacing: -0.04em; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; transition: filter 0.5s var(--ease); }
 .st-who { margin: 1cqh 0 0; display: flex; align-items: center; gap: 2cqw; font-size: 4.2cqw; color: var(--ink); }
 .st-sub { margin: 1cqh 0 0; font-size: 4.2cqw; color: var(--dim); font-variant-numeric: tabular-nums; }
-.st-race { list-style: none; margin: 1.2cqh 0 0; padding: 0; display: grid; gap: 0.2cqh; font-size: 3.8cqw; }
-.st-race li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2.4cqw; color: var(--dim); font-variant-numeric: tabular-nums; }
-.st-race li .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.st-race li .v { color: var(--ink); transition: filter 0.5s var(--ease); }
-.st-chart { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 2cqh; }
+.st-chart { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 2cqh 4cqw 0 0; } /* price tags hang past the plot: keep them out of the right 15% */
 .story .datebig { font-size: 6cqw; margin-bottom: 0.4cqh; }
 .story .plot { min-height: 80px; }
 .st-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 12px 28px; border: 0; background: #fff; color: #000; font-size: 18px; font-weight: 600; }
@@ -267,7 +263,31 @@ button { font: inherit; color: inherit; cursor: pointer; border-radius: var(--ra
 .st-note { margin: 1.4cqh 0 0; font-size: 3.2cqw; color: rgba(244, 244, 242, 0.55); }
 .story .dot { width: 2.4cqw; height: 2.4cqw; }
 /* ?hide=1: the number, the race values, the price tags and the value axis stay blurred until the last second */
-.story[data-hide='true'] .st-value, .story[data-hide='true'] .st-race .v, .story[data-hide='true'] .tag.price,
+.story[data-hide='true'] .st-value, .story[data-hide='true'] .tag.price,
 .story[data-hide='true'] text.tl[text-anchor='end'] { filter: blur(14px); }
 .story[data-hide='true'] .tag.price, .story[data-hide='true'] text.tl[text-anchor='end'] { filter: blur(6px); }
 .st-note .src { display: block; margin-top: 0.4cqh; font-size: 2.8cqw; }
+
+/* races: the line in front a touch stronger, a ring where the lead changed hands */
+.draw.lead { stroke-width: 3.2; }
+.draw.behind { opacity: 0.7; }
+.mark circle { fill: none; stroke-width: 2; }
+.mark { animation: markin 0.5s var(--ease) both; }
+@keyframes markin { from { opacity: 0; } }
+.st-flash {
+  position: absolute; left: 0; top: 9cqw; margin: 0; padding: 0.6em 0.9em; display: flex; align-items: center; gap: 2cqw;
+  font-size: 4cqw; font-weight: 600; background: #fff; color: #000; border-radius: var(--radius-md);
+  z-index: 5; animation: flash 1.6s var(--ease) both; pointer-events: none;
+}
+.st-flash .dot { box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.6); }
+@keyframes flash { 0% { opacity: 0; transform: translateY(8px); } 15%, 75% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.st-rank {
+  position: absolute; inset: 0; margin: 0; padding: 3cqw 4cqw; list-style: none; display: grid; align-content: center; gap: 1.2cqh; overflow: hidden;
+  z-index: 5; background: #0a0a0a; border-radius: var(--radius-lg); font-size: 4.6cqw; font-variant-numeric: tabular-nums;
+  animation: rise 0.6s var(--ease) both;
+}
+.st-rank li { display: grid; grid-template-columns: 3.2em auto 1fr auto; align-items: center; gap: 2.4cqw; color: var(--dim); }
+.st-rank li:first-child { color: var(--ink); font-size: 1.15em; font-weight: 600; }
+.st-rank .pos { color: var(--dim); font-weight: 500; }
+.st-rank .v { color: var(--ink); }
+.leadtag { color: var(--ink); font-weight: 600; }
