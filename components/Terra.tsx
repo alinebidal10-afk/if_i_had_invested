@@ -2,7 +2,8 @@
 import { animate, motion, useMotionValue, useReducedMotion } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { findBuyPoint, pctChange, priceAt, valueNow } from '../lib/calc';
+import { findBuyPoint, pctChange, valueNow } from '../lib/calc';
+import { lineSeries, lineValueAt } from '../lib/series';
 import { paceLabel } from '../lib/pace';
 import { shareText, shareUrl, type ShareRow } from '../lib/share';
 import { SPEEDS, usePlayback } from '../lib/usePlayback';
@@ -437,16 +438,25 @@ export default function Terra() {
     [submitted],
   );
 
+  // Each line as the chart draws it: under the crosshair, a readout says exactly what the line's tag says.
+  const drawn = useMemo(
+    () =>
+      Object.fromEntries(
+        rows.flatMap((r) => (r.buyPt && data ? [[r.quote.symbol, lineSeries({ buy: r.buyPt.p, buyT: r.buyPt.t, now: r.now, points: r.points }, data.amount, 'value', tEnd)]] : [])),
+      ),
+    [rows, data, tEnd],
+  );
+  const valueOn = (symbol: string, t: number) => lineValueAt(drawn[symbol] ?? [], t);
+
   const readouts: Readout[] = rows.map((r) => {
-    const price = cursorT !== null ? priceAt(r.points, cursorT) : r.now;
-    const ok = r.buyPt && price !== null && (cursorT === null || cursorT >= r.buyPt.t);
+    const value = !r.buyPt ? null : cursorT !== null ? valueOn(r.quote.symbol, cursorT) : valueNow(data!.amount, r.buyPt.p, r.now);
     return {
       quote: r.quote,
       color: r.color,
       ticked: r.ticked,
       available: !!r.buyPt,
-      value: ok ? valueNow(data!.amount, r.buyPt!.p, price!) : null,
-      pct: ok ? pctChange(r.buyPt!.p, price!) : null,
+      value,
+      pct: value !== null ? pctChange(data!.amount, value) : null,
     };
   });
 
@@ -454,8 +464,7 @@ export default function Terra() {
   const tLead = runOn ? (pb.ended ? tEnd : pb.playT) : 0;
   const race = useLead(
     rows.map((r) => {
-      const p = pb.ended ? r.now : priceAt(r.points, tLead);
-      return { symbol: r.quote.symbol, value: r.buyPt && p !== null && tLead >= r.buyPt.t ? valueNow(data!.amount, r.buyPt.p, p) : null };
+      return { symbol: r.quote.symbol, value: r.buyPt ? (pb.ended ? valueNow(data!.amount, r.buyPt.p, r.now) : valueOn(r.quote.symbol, tLead)) : null };
     }),
     tLead,
     pb.playing,

@@ -46,6 +46,6 @@ The app is hosted on Vercel. Set `NEXT_PUBLIC_SITE_URL` to the public address (f
 
 ## Notes
 
-- Yahoo has no Bitcoin prices before Sep 17, 2014. Earlier daily prices (from Jul 18, 2010) come from Coin Metrics community data, under the CC BY-NC 4.0 license (attribution required, non-commercial use only), in `data/btc-early.json`.
+- Yahoo has no Bitcoin prices before Sep 17, 2014. Earlier daily prices (from Jul 18, 2010) come from Coin Metrics community data, under the CC BY-NC 4.0 license (attribution required, non-commercial use only), in `data/btc-early.json`. Set `EARLY_BTC_ENABLED=false` and redeploy to remove those prices and their credit.
 - Yahoo has no gold futures (GC=F) before August 2000.
 - Binance is blocked in some regions. There, crypto falls back to the 5 s check.

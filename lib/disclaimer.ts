@@ -1,5 +1,5 @@
 // The small print under a chart, built from what is actually on it.
-import { EARLY_BTC_ATTRIBUTION, usesEarlyBtc } from './btcEarly';
+import { EARLY_BTC_ATTRIBUTION, usesEarlyBtc } from './earlyBtcInfo';
 import type { Kind } from './types';
 
 export const NOT_ADVICE = 'For fun. Not financial advice.';

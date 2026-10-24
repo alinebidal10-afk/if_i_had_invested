@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
-import { pctChange, valueNow } from '../lib/calc';
 import { axisMoney, axisPct, mergeTicks, niceTicks, pruneTicks, tagMoney, tagPct, timeTicks, type Entry } from '../lib/ticks';
+import { lastAt, lineSeries, valueAt } from '../lib/series';
 import type { Point } from '../lib/types';
 
 export type Unit = 'value' | 'pct';
@@ -21,6 +21,9 @@ type Props = {
   endLabel?: string; // what the big date says at the end, when "today" is a fixed date
   leader?: string | null; // in a race, the line that is ahead is drawn a little stronger
   marks?: { t: number; symbol: string }[]; // where the lead changed hands: a ring on the new leader's line
+  // Every drawn frame: each line's value at the crosshair, exactly as its tag shows it. For numbers outside the
+  // chart that must never disagree with it (story mode writes its big number from here).
+  onFrame?: (t: number, values: Record<string, number>) => void;
 };
 
 type Series = { symbol: string; color: string; buyT: number; pts: { t: number; v: number }[]; cmin: number[]; cmax: number[] };
@@ -29,38 +32,9 @@ type YTick = Entry<{ key: number; label: string }>; // key is the value
 
 const DAY = 864e5;
 const NO_MARKS: { t: number; symbol: string }[] = [];
-const MAX_POINTS = 500;
 const TAG_H = 22; // price tags never sit closer than this
 const FADE_MS = 150;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-function thin(pts: Point[]): Point[] {
-  if (pts.length <= MAX_POINTS) return pts;
-  const step = Math.ceil(pts.length / MAX_POINTS);
-  const out = pts.filter((_, i) => i % step === 0);
-  if (out[out.length - 1] !== pts[pts.length - 1]) out.push(pts[pts.length - 1]);
-  return out;
-}
-
-// The last point at or before t, or -1 if the line has not started yet.
-function lastAt(pts: { t: number }[], t: number): number {
-  if (!pts.length || pts[0].t > t) return -1;
-  let lo = 0;
-  let hi = pts.length - 1;
-  while (lo < hi) {
-    const mid = (lo + hi + 1) >> 1;
-    if (pts[mid].t <= t) lo = mid;
-    else hi = mid - 1;
-  }
-  return lo;
-}
-
-// The value on a line at time t, easing toward the next point.
-function valueAt(pts: { t: number; v: number }[], i: number, t: number): number {
-  const a = pts[i];
-  const b = pts[i + 1];
-  return b && b.t > a.t ? a.v + ((b.v - a.v) * (t - a.t)) / (b.t - a.t) : a.v;
-}
 
 // Black or white text, whichever reads on this line colour.
 function inkOn(hex: string): string {
@@ -81,7 +55,7 @@ const minWindow = (span: number) => Math.min(span, Math.max(span * 0.03, 30 * DA
 
 type Pad = { top: number; right: number; bottom: number; left: number };
 
-export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase, startLabel, loading, progress, tEnd, endLabel = 'Today', leader = null, marks = NO_MARKS }: Props) {
+export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase, startLabel, loading, progress, tEnd, endLabel = 'Today', leader = null, marks = NO_MARKS, onFrame }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [ticks, setTicks] = useState<{ x: XTick[]; y: YTick[] }>({ x: [], y: [] });
@@ -103,8 +77,7 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
   const series = useMemo<Series[]>(
     () =>
       lines.map((l) => {
-        const conv = (p: number) => (unit === 'value' ? valueNow(amount, l.buy, p) : pctChange(l.buy, p));
-        const pts = thin([...l.points.filter((p) => p.t >= l.buyT), { t: tEnd, p: l.now }]).map((p) => ({ t: p.t, v: conv(p.p) }));
+        const pts = lineSeries(l, amount, unit, tEnd);
         let lo = Infinity;
         let hi = -Infinity;
         const cmin: number[] = [];
@@ -149,8 +122,8 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
     X: (t: number) => t,
     Y: (v: number) => v,
   });
-  const live = useRef({ series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, marks, ver: 0 });
-  live.current = { series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, marks, ver: live.current.ver + 1 };
+  const live = useRef({ series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, marks, onFrame, ver: 0 });
+  live.current = { series, t0, tEnd, unit, amount, w: size.w, h: size.h, pad, hoverT, narrow, endLabel, marks, onFrame, ver: live.current.ver + 1 };
   const frameRef = useRef(() => {});
 
   function place(g: SVGGElement, axis: 'x' | 'y', v: number) {
@@ -236,6 +209,7 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
 
     // Lines, tips, price tags.
     const tagYs: { sym: string; y: number }[] = [];
+    const vals: Record<string, number> = {};
     L.series.forEach((s, k) => {
       const i = idx[k];
       const path = E.paths.get(s.symbol);
@@ -257,6 +231,7 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
         return;
       }
       const v = valueAt(s.pts, ci, tc);
+      vals[s.symbol] = v;
       const y = Y(v);
       if (tip) {
         tip.style.visibility = 'visible';
@@ -269,6 +244,8 @@ export default function LiveChart({ lines, amount, unit, hoverT, onHover, phase,
         tagYs.push({ sym: s.symbol, y: Math.min(L.pad.top + ih - TAG_H / 2, Math.max(L.pad.top + TAG_H / 2, y)) });
       }
     });
+    L.onFrame?.(tc, vals);
+
     // Tags that would overlap are nudged apart, keeping their order by value.
     tagYs.sort((a, b) => a.y - b.y);
     for (let i = 1; i < tagYs.length; i++) tagYs[i].y = Math.max(tagYs[i].y, tagYs[i - 1].y + TAG_H);

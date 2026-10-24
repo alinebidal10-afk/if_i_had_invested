@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { pctChange, priceAt } from '../lib/calc';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { pctChange } from '../lib/calc';
+import { lineSeries, lineValueAt } from '../lib/series';
 import { assetLabel } from '../lib/assets';
 import { NOT_ADVICE, sourceNote } from '../lib/disclaimer';
 import { COLORS } from '../lib/colors';
@@ -133,12 +134,18 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
     return () => clearTimeout(id);
   }, [pb.ended]);
 
+  // Every line starts from the same dollar value (the amount, or the units at their first price).
+  const amount = usable[0] ? usable[0].start.qty * usable[0].start.buy.p : (scenario.amount ?? 0);
+  const lines: Line[] = useMemo(
+    () => usable.map((r) => ({ symbol: r.quote.symbol, color: r.color, buy: r.start.buy.p, buyT: r.start.buy.t, now: r.now, points: r.start.points })),
+    [rows], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  // The lines exactly as the chart draws them: every number here is read off these, never off the raw closes.
+  const drawn = useMemo(() => Object.fromEntries(lines.map((l) => [l.symbol, lineSeries(l, amount, 'value', tEnd)])), [lines, amount, tEnd]);
+
   const t = pb.ended ? tEnd : go ? pb.playT : tStart;
   const values = usable
-    .map((r) => {
-      const p = pb.ended ? r.now : t < r.start.buy.t ? null : priceAt(r.start.points, t);
-      return { r, value: p === null ? null : r.start.qty * p };
-    })
+    .map((r) => ({ r, value: lineValueAt(drawn[r.quote.symbol] ?? [], t) }))
     .sort((a, b) => (b.value ?? -Infinity) - (a.value ?? -Infinity));
   const top = values[0];
   const race = useLead(
@@ -146,29 +153,53 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
     t,
     pb.playing && (pb.progress.current ?? 0) > 0.04, // the first few frames are noise, not a race
   );
-  const leading = values.find((v) => v.r.quote.symbol === race.lead) ?? top;
+  // At the end the order is final: the top value wins, whatever the 2% margin was still holding on to.
+  const leading = (!pb.ended && values.find((v) => v.r.quote.symbol === race.lead)) || top;
   const colorOf = (sym: string) => usable.find((r) => r.quote.symbol === sym)?.color ?? '#fff';
 
   // ?hide=1: the number stays blurred until the last second of the run.
   const leftMs = (1 - (pb.progress.current ?? 0)) * playMs;
   const hidden = opts.hide && !pb.ended && (!go || leftMs > 1000);
 
-  const lines: Line[] = useMemo(
-    () => usable.map((r) => ({ symbol: r.quote.symbol, color: r.color, buy: r.start.buy.p, buyT: r.start.buy.t, now: r.now, points: r.start.points })),
-    [rows], // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
-  // Every line starts from the same dollar value (the amount, or the units at their first price).
-  const amount = usable[0] ? usable[0].start.qty * usable[0].start.buy.p : (scenario.amount ?? 0);
-  const label = big(leading?.value ?? amount);
   const one = values.length === 1 ? values[0] : null;
   const startSub = !one
     ? ''
     : scenario.units
       ? `Worth ${formatAmount(Math.round(amount * 100) / 100)} in ${formatDate(iso, 'month')}${one.r.start.implied ? ' (price implied by the trade)' : ''}`
-      : `From ${formatAmount(Math.round(amount * 100) / 100)}${one.value !== null && go ? ` · ${tagPct(pctChange(amount, one.value))}` : ''}`;
-  // As big as the frame allows: a little smaller in a race, where the chart carries four price tags.
-  const fit = { fontSize: `min(${values.length > 1 ? 13 : 17}cqw, ${(118 / Math.max(6, label.length)).toFixed(2)}cqw)` };
+      : `From ${formatAmount(Math.round(amount * 100) / 100)}`;
+
+  // The big number (and the % beside a single asset) is written straight from the chart's frame: while the line
+  // moves it is the leader's value in the very frame its price tag shows, so the two can never disagree.
+  const bigRef = useRef<HTMLParagraphElement>(null);
+  const pctRef = useRef<HTMLSpanElement>(null);
+  const bigState = useRef({ go: false, lead: null as string | null, race: false, single: !scenario.units && !!one, amount });
+  bigState.current = { go, lead: leading?.r.quote.symbol ?? null, race: values.length > 1, single: !scenario.units && !!one, amount };
+  const paint = useCallback((v: number | null, showPct: boolean) => {
+    const L = bigState.current;
+    const el = bigRef.current;
+    if (el) {
+      const text = big(v ?? L.amount);
+      if (el.textContent !== text) el.textContent = text;
+      // As big as the frame allows: a little smaller in a race, where the chart carries four price tags.
+      el.style.fontSize = `min(${L.race ? 13 : 17}cqw, ${(118 / Math.max(6, text.length)).toFixed(2)}cqw)`;
+    }
+    const pe = pctRef.current;
+    if (pe) {
+      const text = L.single && showPct && v !== null ? ` · ${tagPct(pctChange(L.amount, v))}` : '';
+      if (pe.textContent !== text) pe.textContent = text;
+    }
+  }, []);
+  const onFrame = useCallback(
+    (_t: number, vals: Record<string, number>) => {
+      const L = bigState.current;
+      if (L.lead) paint(vals[L.lead] ?? null, L.go);
+    },
+    [paint],
+  );
+  // Before the chart draws its first frame, the number is the starting amount; after that, only frames paint it.
+  useLayoutEffect(() => {
+    if (!ready) paint(null, false);
+  });
 
   return (
     <main className="story" data-hide={hidden} data-done={done}>
@@ -185,10 +216,13 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
           ) : (
             <>
               <div className="st-big">
-                <p className="st-value" style={fit}>
-                  {label}
-                </p>
-                {startSub && <p className="st-sub">{startSub}</p>}
+                <p className="st-value" ref={bigRef} />
+                {startSub && (
+                  <p className="st-sub">
+                    {startSub}
+                    <span ref={pctRef} />
+                  </p>
+                )}
                 {values.length > 1 && leading && (
                   <p className="st-who">
                     <span className="dot" style={{ background: leading.r.color }} /> {assetLabel(leading.r.quote.symbol)} {pb.ended ? 'wins' : 'leads'}
@@ -210,6 +244,7 @@ export default function Story({ scenario, opts, domain }: StoryProps) {
                   endLabel={opts.asOf ? formatDate(opts.asOf) : undefined}
                   leader={race.lead}
                   marks={race.marks}
+                  onFrame={onFrame}
                 />
                 {race.flash && !pb.ended && (
                   <p key={race.flash.n} className="st-flash">

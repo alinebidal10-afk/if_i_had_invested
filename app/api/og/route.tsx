@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 import { assetLabel } from '../../../lib/assets';
 import { COLORS } from '../../../lib/colors';
 import { dividendNote, NOT_ADVICE } from '../../../lib/disclaimer';
-import { usesEarlyBtc, EARLY_BTC_ATTRIBUTION } from '../../../lib/btcEarly';
+import { EARLY_BTC_ATTRIBUTION, usesEarlyBtc } from '../../../lib/earlyBtcInfo';
 import { money } from '../../../lib/format';
 import { formatAmount, formatDate } from '../../../lib/parse';
 import { resolveScenario, sentenceOf, startOf } from '../../../lib/scenario';
