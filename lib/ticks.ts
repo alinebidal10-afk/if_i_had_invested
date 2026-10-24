@@ -33,6 +33,7 @@ export const axisPct = (v: number) => `${SIGNED(v)}${Math.abs(v) >= 1000 ? Math.
 
 // The value tags that follow the playhead: exact enough to read, short enough to fit.
 export function tagMoney(v: number): string {
+  if (v >= 1e9) return `$${tidy(v / 1e9, v >= 1e10 ? 1 : 2)}B`;
   if (v >= 1e6) return `$${tidy(v / 1e6, v >= 1e7 ? 1 : 2)}M`;
   if (v >= 1e5) return `$${tidy(v / 1e3, 0)}k`;
   if (v >= 1e3) return `$${Math.round(v).toLocaleString('en-US')}`;

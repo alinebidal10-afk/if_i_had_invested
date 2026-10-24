@@ -8,6 +8,7 @@ import { shareText, shareUrl, type ShareRow } from '../lib/share';
 import { SPEEDS, usePlayback } from '../lib/usePlayback';
 import { formatAmount, formatAmountPlain, formatDate, parseAmount, parseDate, type Precision } from '../lib/parse';
 import { MAX_ASSETS } from '../lib/assets';
+import { EARLY_BTC_ATTRIBUTION, usesEarlyBtc } from '../lib/btcEarly';
 import { loadPrices, type Prices } from '../lib/priceCache';
 import type { AssetInfo, Kind } from '../lib/types';
 import { useLivePrices } from '../lib/useLivePrices';
@@ -474,6 +475,9 @@ export default function Terra() {
   const sText = data ? shareText(data.amount, data.iso, shareRows) : '';
   const sUrl = submitted && typeof window !== 'undefined' ? shareUrl(submitted.symbols.split(','), submitted.iso, submitted.amount, window.location.origin) : '';
 
+  // Sources under the chart; the early Bitcoin prices carry their own licence line.
+  const note = `Returns include dividends. Prices: Yahoo Finance, Binance.${submitted && usesEarlyBtc(submitted.symbols.split(','), submitted.iso) ? ` ${EARLY_BTC_ATTRIBUTION}.` : ''}`;
+
   const flash = (msg: string) => {
     setToast(msg);
     clearTimeout(toastTimer.current);
@@ -662,6 +666,7 @@ export default function Terra() {
             onChange={() => enterEdit('amount')}
             onShare={doShare}
             sharePop={shareOpen ? <SharePop text={sText} url={sUrl} onCopy={copyLink} /> : null}
+            note={note}
           />
         </div>
       </div>

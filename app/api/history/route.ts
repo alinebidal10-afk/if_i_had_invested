@@ -1,3 +1,4 @@
+import { withEarlyBtc } from '../../../lib/btcEarly';
 import type { Point } from '../../../lib/types';
 import { parseSymbols, yf } from '../../../lib/yahoo';
 
@@ -21,7 +22,7 @@ async function daily(symbol: string, from: string): Promise<Point[]> {
     if (p == null || !(p > 0)) continue; // a zero price would divide returns by zero
     byDay.set(Math.floor((q.date.getTime() + off) / DAY) * DAY, p);
   }
-  const pts = [...byDay].map(([t, p]) => ({ t, p })).sort((a, b) => a.t - b.t);
+  const pts = withEarlyBtc(symbol, from, [...byDay].map(([t, p]) => ({ t, p })).sort((a, b) => a.t - b.t));
   cache.set(key, { at: Date.now(), pts });
   return pts;
 }

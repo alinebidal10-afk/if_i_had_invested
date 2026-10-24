@@ -6,6 +6,7 @@ type Props = {
   onChange: () => void;
   onShare: () => void;
   sharePop: React.ReactNode;
+  note: string;
 };
 
 const ShareGlyph = () => (
@@ -15,7 +16,7 @@ const ShareGlyph = () => (
 );
 
 // The bar that fades in once the graph is up.
-export default function Controls({ unit, onUnit, onChange, onShare, sharePop }: Props) {
+export default function Controls({ unit, onUnit, onChange, onShare, sharePop, note }: Props) {
   return (
     <div className="controls">
       <div className="buttons">
@@ -33,7 +34,7 @@ export default function Controls({ unit, onUnit, onChange, onShare, sharePop }: 
           {sharePop}
         </span>
       </div>
-      <p className="note">Returns include dividends. Prices: Yahoo Finance, Binance.</p>
+      <p className="note">{note}</p>
     </div>
   );
 }

@@ -4,6 +4,8 @@ import Story from '../components/Story';
 import Terra from '../components/Terra';
 import { listNames } from '../lib/assets';
 import { formatAmount, formatDate, parseDate } from '../lib/parse';
+import { redirect } from 'next/navigation';
+import { resolveScenario, scenarioQuery } from '../lib/scenario';
 import { SITE_DOMAIN } from '../lib/site';
 import { parseStoryOpts, STORY_MAX_ASSETS } from '../lib/story';
 import { parseSymbols } from '../lib/yahoo';
@@ -33,15 +35,16 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export default async function Page({ searchParams }: Props) {
   const sp = await searchParams;
-  const opts = parseStoryOpts((k) => first(sp[k]) || null);
+  const get = (k: string) => first(sp[k]) || null;
+  const opts = parseStoryOpts(get);
   if (opts.story) {
     // Same rules as a shared link, at most four assets: the 9:16 frame has room for a four-way race.
-    const symbols = parseSymbols(first(sp.assets), STORY_MAX_ASSETS);
-    const d = parseDate(first(sp.date));
-    const amount = Number(first(sp.amount));
-    if (symbols.length && d.ok && amount > 0 && amount <= 1e12) {
-      return <Story symbols={symbols} iso={d.value.iso} amount={amount} opts={opts} domain={SITE_DOMAIN} />;
-    }
+    const scenario = resolveScenario(get, STORY_MAX_ASSETS);
+    if (scenario) return <Story scenario={scenario} opts={opts} domain={SITE_DOMAIN} />;
+  } else if (first(sp.preset)) {
+    // The page itself has no "Instead of buying" sentence: a preset opens as the plain comparison it stands for.
+    const s = resolveScenario(get);
+    if (s?.preset) redirect(`/?${scenarioQuery({ ...s, preset: null })}`);
   }
   return (
     <Suspense>

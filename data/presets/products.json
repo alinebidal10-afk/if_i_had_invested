@@ -1,0 +1,26 @@
+[
+  {
+    "id": "iphone-2007",
+    "name": "the first iPhone",
+    "launchDate": "2007-06-29",
+    "launchPriceUSD": 499,
+    "ticker": "AAPL",
+    "sourceUrl": "TODO-verify"
+  },
+  {
+    "id": "ps4-2013",
+    "name": "a PlayStation 4",
+    "launchDate": "2013-11-15",
+    "launchPriceUSD": 399,
+    "ticker": "SONY",
+    "sourceUrl": "TODO-verify"
+  },
+  {
+    "id": "tesla-model-s-2012",
+    "name": "a Tesla Model S",
+    "launchDate": "2012-06-22",
+    "launchPriceUSD": 57400,
+    "ticker": "TSLA",
+    "sourceUrl": "TODO-verify"
+  }
+]

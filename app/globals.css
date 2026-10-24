@@ -270,3 +270,4 @@ button { font: inherit; color: inherit; cursor: pointer; border-radius: var(--ra
 .story[data-hide='true'] .st-value, .story[data-hide='true'] .st-race .v, .story[data-hide='true'] .tag.price,
 .story[data-hide='true'] text.tl[text-anchor='end'] { filter: blur(14px); }
 .story[data-hide='true'] .tag.price, .story[data-hide='true'] text.tl[text-anchor='end'] { filter: blur(6px); }
+.st-note .src { display: block; margin-top: 0.4cqh; font-size: 2.8cqw; }

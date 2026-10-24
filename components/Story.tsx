@@ -1,11 +1,14 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { findBuyPoint, priceAt, valueNow } from '../lib/calc';
-import { assetLabel, listNames } from '../lib/assets';
+import { pctChange, priceAt } from '../lib/calc';
+import { assetLabel } from '../lib/assets';
+import { EARLY_BTC_ATTRIBUTION, usesEarlyBtc } from '../lib/btcEarly';
 import { money } from '../lib/format';
+import { tagPct } from '../lib/ticks';
 import { durationMs, spanYears } from '../lib/pace';
 import { formatAmount, formatDate } from '../lib/parse';
 import { loadPrices, type Prices } from '../lib/priceCache';
+import { sentenceOf, startOf, type Scenario } from '../lib/scenario';
 import { HOLD_MS, playMsFor, type StoryOpts } from '../lib/story';
 import { useLivePrices } from '../lib/useLivePrices';
 import { usePlayback } from '../lib/usePlayback';
@@ -24,13 +27,14 @@ declare global {
   }
 }
 
-export type StoryProps = { symbols: string[]; iso: string; amount: number; opts: StoryOpts; domain: string };
+export type StoryProps = { scenario: Scenario; opts: StoryOpts; domain: string };
 
 // Whole dollars once the number is big enough that cents are noise.
 const big = (n: number) => (Math.abs(n) >= 100 ? money(Math.round(n)).replace(/\.00$/, '') : money(n));
 
 // The 9:16 recording view: one sentence, one big number, one chart. No inputs, no buttons.
-export default function Story({ symbols, iso, amount, opts, domain }: StoryProps) {
+export default function Story({ scenario, opts, domain }: StoryProps) {
+  const { symbols, iso } = scenario;
   const [prices, setPrices] = useState<Prices | null>(null);
   const [error, setError] = useState('');
   const [fonts, setFonts] = useState(false);
@@ -58,22 +62,22 @@ export default function Story({ symbols, iso, amount, opts, domain }: StoryProps
     return prices.quotes.map((quote, i) => {
       const all = prices.history[quote.symbol] ?? [];
       const points = asOfMs === null ? all : all.filter((p) => p.t <= asOfMs);
-      const buyPt = findBuyPoint(points, dayMs(iso));
+      const start = startOf(scenario, points);
       const last = points[points.length - 1]?.p ?? null;
       const now = asOfMs === null ? (live[quote.symbol]?.price ?? quote.price) : last;
-      return { quote, points, buyPt, now, color: COLORS[i % COLORS.length] };
+      return { quote, first: points[0]?.t ?? null, start, now, color: COLORS[i % COLORS.length] };
     });
-  }, [prices, live, asOfMs, iso]);
+  }, [prices, live, asOfMs, scenario]);
 
-  const usable = rows.filter((r) => r.buyPt && r.now !== null);
+  const usable = rows.flatMap((r) => (r.start && r.now !== null ? [{ ...r, start: r.start, now: r.now }] : []));
   // "Today" is fixed once the prices are in, so the span (and the run length) never drifts mid-run.
   const tEnd = useMemo(() => asOfMs ?? Date.now(), [prices, asOfMs]); // eslint-disable-line react-hooks/exhaustive-deps
-  const tStart = usable.length ? Math.min(...usable.map((r) => r.buyPt!.t)) : 0;
+  const tStart = usable.length ? Math.min(...usable.map((r) => r.start.buy.t)) : 0;
   const ready = fonts && !!prices && usable.length > 0 && tEnd > tStart;
   const playMs = opts.durationS ? playMsFor(opts.durationS) : durationMs(spanYears(tStart, tEnd), 1);
 
   useEffect(() => {
-    if (prices && !usable.length) setError(asOfMs !== null && asOfMs <= dayMs(iso) ? 'asOf must be after the start date.' : `No price for ${listNames(symbols)} on ${formatDate(iso)}.`);
+    if (prices && !usable.length) setError(whyNoStart());
   }, [prices]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (error) window.__storyError = error;
@@ -87,6 +91,17 @@ export default function Story({ symbols, iso, amount, opts, domain }: StoryProps
     const id = setTimeout(() => setGo(true), INTRO_MS);
     return () => clearTimeout(id);
   }, [ready, opts.autoplay]);
+
+  // Why nothing can be drawn, in words: a frozen date before the start, or an asset that had no price yet.
+  function whyNoStart(): string {
+    if (asOfMs !== null && asOfMs <= dayMs(iso)) return 'asOf must be after the start date.';
+    const r = rows[0];
+    const name = r ? assetLabel(r.quote.symbol) : symbols[0];
+    const first = r?.first ? ` Its first price is on ${formatDate(new Date(r.first).toISOString().slice(0, 10))}.` : '';
+    if (scenario.preset) return `This preset starts before ${name} had a price.${first}`;
+    if (scenario.units && !scenario.paid) return `No market price for ${name} on ${formatDate(iso)}. Add paid= to start from what was paid.${first}`;
+    return `No price for ${name} on ${formatDate(iso)}.${first}`;
+  }
 
   const pb = usePlayback({ on: ready && go, t0: ready ? tStart : 0, tEnd, instant: false, fixedMs: playMs });
 
@@ -103,8 +118,8 @@ export default function Story({ symbols, iso, amount, opts, domain }: StoryProps
   const t = pb.ended ? tEnd : go ? pb.playT : tStart;
   const values = usable
     .map((r) => {
-      const p = pb.ended ? r.now! : t < r.buyPt!.t ? null : priceAt(r.points, t);
-      return { r, value: p === null ? null : valueNow(amount, r.buyPt!.p, p) };
+      const p = pb.ended ? r.now : t < r.start.buy.t ? null : priceAt(r.start.points, t);
+      return { r, value: p === null ? null : r.start.qty * p };
     })
     .sort((a, b) => (b.value ?? -Infinity) - (a.value ?? -Infinity));
   const top = values[0];
@@ -114,12 +129,19 @@ export default function Story({ symbols, iso, amount, opts, domain }: StoryProps
   const hidden = opts.hide && !pb.ended && (!go || leftMs > 1000);
 
   const lines: Line[] = useMemo(
-    () => usable.map((r) => ({ symbol: r.quote.symbol, color: r.color, buy: r.buyPt!.p, buyT: r.buyPt!.t, now: r.now!, points: r.points })),
+    () => usable.map((r) => ({ symbol: r.quote.symbol, color: r.color, buy: r.start.buy.p, buyT: r.start.buy.t, now: r.now, points: r.start.points })),
     [rows], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const sentence = `If I had invested ${formatAmount(amount)} on ${formatDate(iso)} in ${listNames(symbols)}.`;
-  const label = top?.value != null ? big(top.value) : big(amount);
+  // Every line starts from the same dollar value (the amount, or the units at their first price).
+  const amount = usable[0] ? usable[0].start.qty * usable[0].start.buy.p : (scenario.amount ?? 0);
+  const label = big(top?.value ?? amount);
+  const one = values.length === 1 ? values[0] : null;
+  const startSub = !one
+    ? ''
+    : scenario.units
+      ? `Worth ${formatAmount(Math.round(amount * 100) / 100)} in ${formatDate(iso, 'month')}${one.r.start.implied ? ' (price implied by the trade)' : ''}`
+      : `From ${formatAmount(Math.round(amount * 100) / 100)}${one.value !== null && go ? ` · ${tagPct(pctChange(amount, one.value))}` : ''}`;
   // As big as the frame allows: smaller in a race, where the list below needs the room.
   const fit = { fontSize: `min(${values.length > 1 ? 13 : 17}cqw, ${(118 / Math.max(6, label.length)).toFixed(2)}cqw)` };
 
@@ -130,7 +152,7 @@ export default function Story({ symbols, iso, amount, opts, domain }: StoryProps
         <p className="wm">{domain}</p>
         <div className="story-safe">
           {opts.title && <h1 className="st-title">{opts.title}</h1>}
-          <p className="st-sentence">{sentence}</p>
+          <p className="st-sentence">{sentenceOf(scenario)}</p>
           {error ? (
             <p className="st-error" role="alert">
               {error}
@@ -141,6 +163,7 @@ export default function Story({ symbols, iso, amount, opts, domain }: StoryProps
                 <p className="st-value" style={fit}>
                   {label}
                 </p>
+                {startSub && <p className="st-sub">{startSub}</p>}
                 {values.length > 1 && top && (
                   <p className="st-who">
                     <span className="dot" style={{ background: top.r.color }} /> {assetLabel(top.r.quote.symbol)} leads
@@ -180,7 +203,10 @@ export default function Story({ symbols, iso, amount, opts, domain }: StoryProps
               </div>
             </>
           )}
-          <p className="st-note">For fun. Not financial advice.</p>
+          <p className="st-note">
+            For fun. Not financial advice.
+            {usesEarlyBtc(symbols, iso) && <span className="src">{EARLY_BTC_ATTRIBUTION}.</span>}
+          </p>
         </div>
       </div>
     </main>
