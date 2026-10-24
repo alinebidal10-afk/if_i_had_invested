@@ -13,7 +13,6 @@
     "next": "^16.4.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "recharts": "^3.10.1",
     "yahoo-finance2": "^4.0.4"
   },
   "devDependencies": {
